@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Editor from "@monaco-editor/react";
 import Button from "../ui/Button";
 
 const LANGUAGES = [
@@ -12,6 +13,18 @@ const LANGUAGES = [
   "Rust",
   "PHP",
 ];
+
+const languageMap = {
+  JavaScript: "javascript",
+  TypeScript: "typescript",
+  Python: "python",
+  Java: "java",
+  "C++": "cpp",
+  "C#": "csharp",
+  Go: "go",
+  Rust: "rust",
+  PHP: "php",
+};
 
 const AnalysisForm = ({ onAnalyze, loading }) => {
   const [title, setTitle] = useState("");
@@ -32,7 +45,9 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
 
   return (
     <form onSubmit={submitHandler} className="space-y-6">
+
       {/* Title */}
+
       <div>
         <label className="mb-2 block font-medium text-ink">
           Title
@@ -44,11 +59,12 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Infinite Loop Bug"
           required
-          className="w-full rounded-lg border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
+          className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
         />
       </div>
 
       {/* Language */}
+
       <div>
         <label className="mb-2 block font-medium text-ink">
           Programming Language
@@ -57,7 +73,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="w-full rounded-lg border border-base-border bg-[#111827] p-3 text-white focus:border-brand-500 focus:outline-none"
+          className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white focus:border-brand-500 focus:outline-none"
         >
           {LANGUAGES.map((lang) => (
             <option
@@ -72,6 +88,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
       </div>
 
       {/* Bug Description */}
+
       <div>
         <label className="mb-2 block font-medium text-ink">
           Bug Description
@@ -83,24 +100,57 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
           onChange={(e) => setBugDescription(e.target.value)}
           placeholder="Describe the bug..."
           required
-          className="w-full rounded-lg border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
+          className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
         />
       </div>
 
-      {/* Code */}
-      <div>
-        <label className="mb-2 block font-medium text-ink">
-          Source Code
-        </label>
+      {/* Monaco Editor */}
 
-        <textarea
-          rows={14}
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Paste your code here..."
-          required
-          className="w-full rounded-lg border border-base-border bg-[#111827] p-3 font-mono text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
-        />
+      <div>
+
+        <div className="mb-3 flex items-center justify-between">
+
+          <label className="font-medium text-ink">
+            Source Code
+          </label>
+
+          <span className="rounded-full bg-brand-500/20 px-3 py-1 text-xs font-semibold text-brand-400">
+            VS Code Editor
+          </span>
+
+        </div>
+
+        <div className="overflow-hidden rounded-xl border border-base-border shadow-xl">
+
+          <Editor
+            height="500px"
+            language={languageMap[language] || "javascript"}
+            theme="vs-dark"
+            value={code}
+            onChange={(value) => setCode(value || "")}
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              fontSize: 14,
+              wordWrap: "on",
+              automaticLayout: true,
+              scrollBeyondLastLine: false,
+              tabSize: 2,
+              formatOnPaste: true,
+              formatOnType: true,
+              roundedSelection: false,
+              cursorBlinking: "smooth",
+              smoothScrolling: true,
+              lineNumbers: "on",
+              padding: {
+                top: 15,
+              },
+            }}
+          />
+
+        </div>
+
       </div>
 
       <Button
@@ -109,8 +159,9 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         fullWidth
         disabled={loading}
       >
-        {loading ? "Analyzing..." : "Analyze Bug"}
+        {loading ? "Analyzing..." : "🚀 Analyze Bug"}
       </Button>
+
     </form>
   );
 };

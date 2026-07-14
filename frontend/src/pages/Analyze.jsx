@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import AnalysisForm from "../components/analysis/AnalysisForm";
 import AnalysisResult from "../components/analysis/AnalysisResult";
 import { createAnalysis } from "../services/analysisService";
+import Editor from "@monaco-editor/react";
 
 const Analyze = () => {
   const [loading, setLoading] = useState(false);
