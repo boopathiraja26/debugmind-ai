@@ -2,12 +2,17 @@ const express = require('express');
 const {
   createAnalysis,
   getAllAnalyses,
+  searchAnalyses,
   getSingleAnalysis,
   deleteAnalysis,
 } = require('../controllers/analysisController');
 const { protect } = require('../middleware/authMiddleware');
 const validate = require('../middleware/validateMiddleware');
-const { validateCreateAnalysis } = require('../validators/analysisValidator');
+const {
+  validateCreateAnalysis,
+  validateListQuery,
+  validateSearchQuery,
+} = require('../validators/analysisValidator');
 
 const router = express.Router();
 
@@ -17,7 +22,10 @@ router.use(protect);
 router.post('/', validate(validateCreateAnalysis), createAnalysis);
 
 // @route   GET /api/analysis
-router.get('/', getAllAnalyses);
+router.get('/', validate(validateListQuery, 'query'), getAllAnalyses);
+
+// @route   GET /api/analysis/search
+router.get('/search', validate(validateSearchQuery, 'query'), searchAnalyses);
 
 // @route   GET /api/analysis/:id
 router.get('/:id', getSingleAnalysis);

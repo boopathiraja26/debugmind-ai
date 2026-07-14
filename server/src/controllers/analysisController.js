@@ -36,21 +36,25 @@ const createAnalysis = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get all analyses for the logged-in user (paginated)
+ * @desc    Get all analyses for the logged-in user with optional filters and pagination
  * @route   GET /api/analysis
  * @access  Private
  */
 const getAllAnalyses = asyncHandler(async (req, res) => {
-  const page = Number.parseInt(req.query.page, 10) > 0 ? Number.parseInt(req.query.page, 10) : 1;
-  const limit =
-    Number.parseInt(req.query.limit, 10) > 0 && Number.parseInt(req.query.limit, 10) <= 50
-      ? Number.parseInt(req.query.limit, 10)
-      : 10;
+  const { page, limit, status, language, date } = req.query;
   const skip = (page - 1) * limit;
 
   const filter = { user: req.user._id };
-  if (req.query.status) {
-    filter.status = req.query.status;
+  if (status) {
+    filter.status = status;
+  }
+  if (language) {
+    filter.language = { $regex: `^${language}$`, $options: 'i' };
+  }
+  if (date) {
+    const startOfDay = new Date(`${date}T00:00:00.000Z`);
+    const endOfDay = new Date(`${date}T23:59:59.999Z`);
+    filter.createdAt = { $gte: startOfDay, $lte: endOfDay };
   }
 
   const [items, total] = await Promise.all([
@@ -58,11 +62,60 @@ const getAllAnalyses = asyncHandler(async (req, res) => {
     Analysis.countDocuments(filter),
   ]);
 
+  const totalPages = Math.ceil(total / limit) || 0;
+
   return sendSuccess(res, 200, 'Analyses fetched successfully', { analyses: items }, {
     page,
     limit,
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  });
+});
+
+/**
+ * @desc    Search the logged-in user's analyses by title, language, or bug description
+ * @route   GET /api/analysis/search
+ * @access  Private
+ */
+const searchAnalyses = asyncHandler(async (req, res) => {
+  const { q, page, limit, status, language } = req.query;
+  const skip = (page - 1) * limit;
+
+  const filter = { user: req.user._id };
+
+  if (status) {
+    filter.status = status;
+  }
+  if (language) {
+    filter.language = { $regex: `^${language}$`, $options: 'i' };
+  }
+
+  if (q) {
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filter.$or = [
+      { title: { $regex: escaped, $options: 'i' } },
+      { language: { $regex: escaped, $options: 'i' } },
+      { bugDescription: { $regex: escaped, $options: 'i' } },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    Analysis.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Analysis.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(total / limit) || 0;
+
+  return sendSuccess(res, 200, 'Search results fetched successfully', { analyses: items }, {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+    query: q || '',
   });
 });
 
@@ -99,6 +152,7 @@ const deleteAnalysis = asyncHandler(async (req, res) => {
 module.exports = {
   createAnalysis,
   getAllAnalyses,
+  searchAnalyses,
   getSingleAnalysis,
   deleteAnalysis,
 };
