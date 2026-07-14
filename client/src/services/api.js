@@ -1,0 +1,49 @@
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../utils/constants';
+import { getToken, clearToken, clearStoredUser } from '../utils/token';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 20000,
+});
+
+// Attach the JWT to every outgoing request when present.
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Normalize errors and handle token expiry globally.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'Something went wrong. Please try again.';
+
+    if (status === 401) {
+      clearToken();
+      clearStoredUser();
+      if (!window.location.pathname.startsWith('/login')) {
+        toast.error('Your session has expired. Please log in again.');
+        window.location.assign('/login');
+      }
+    }
+
+    return Promise.reject({ ...error, message });
+  }
+);
+
+export default api;
