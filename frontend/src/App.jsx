@@ -11,6 +11,7 @@ import { ROUTES } from './utils/constants';
 import Analyze from "./pages/Analyze";
 import History from "./pages/History";
 import AnalysisDetails from "./pages/AnalysisDetails";
+import Profile from "./pages/Profile";
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
           <Route path={ROUTES.DASHBOARD} element={<DashboardPlaceholder />} />
           <Route path={ROUTES.ANALYZE} element={<Analyze />} />
           <Route path="/history/:id" element={<AnalysisDetails />} />
+          <Route path="/profile" element={<Profile />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

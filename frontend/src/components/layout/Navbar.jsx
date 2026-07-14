@@ -40,6 +40,9 @@ const Navbar = () => {
 
           {isAuthenticated ? (
             <>
+              <NavLink to="/profile" className={navLinkClasses}>
+                Profile
+              </NavLink>
               <NavLink to={ROUTES.DASHBOARD} className={navLinkClasses}>
                 Dashboard
               </NavLink>

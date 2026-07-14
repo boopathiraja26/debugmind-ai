@@ -6,7 +6,7 @@ const {
   getSingleAnalysis,
   deleteAnalysis,
 } = require('../controllers/analysisController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect } = require("../middleware/authMiddleware");
 const validate = require('../middleware/validateMiddleware');
 const {
   validateCreateAnalysis,
