@@ -37,7 +37,7 @@ const Register = () => {
 
     try {
       await register({ name: form.name, email: form.email, password: form.password });
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      navigate(ROUTES.LOGIN, { replace: true });
     } catch (err) {
       // Error toast is already handled inside AuthContext.
     }

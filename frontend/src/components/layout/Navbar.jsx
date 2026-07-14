@@ -43,12 +43,19 @@ const Navbar = () => {
               <NavLink to={ROUTES.DASHBOARD} className={navLinkClasses}>
                 Dashboard
               </NavLink>
+               <NavLink to={ROUTES.HISTORY} className={navLinkClasses}>
+                History
+              </NavLink>
+              <NavLink to={ROUTES.ANALYZE} className={navLinkClasses}>
+              Analyze
+              </NavLink>
               <div className="flex items-center gap-3 border-l border-base-border pl-6">
                 <span className="font-mono text-xs text-ink-muted">{user?.name}</span>
                 <Button variant="ghost" size="sm" onClick={handleLogout} leftIcon={<FiLogOut size={14} />}>
                   Logout
                 </Button>
               </div>
+              
             </>
           ) : (
             <div className="flex items-center gap-3">

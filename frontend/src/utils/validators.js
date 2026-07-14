@@ -7,10 +7,6 @@ export const isValidPassword = (password) =>
 
 export const isValidName = (name) => typeof name === 'string' && name.trim().length >= 2;
 
-/**
- * Validates the register form. Returns a field -> message map; empty object
- * means the form is valid.
- */
 export const validateRegisterForm = ({ name, email, password, confirmPassword }) => {
   const errors = {};
 
@@ -30,10 +26,6 @@ export const validateRegisterForm = ({ name, email, password, confirmPassword })
   return errors;
 };
 
-/**
- * Validates the login form. Returns a field -> message map; empty object
- * means the form is valid.
- */
 export const validateLoginForm = ({ email, password }) => {
   const errors = {};
 

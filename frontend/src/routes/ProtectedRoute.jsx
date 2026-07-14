@@ -9,10 +9,10 @@ import { ROUTES } from '../utils/constants';
  * full-screen loader instead of flashing a redirect.
  */
 const ProtectedRoute = () => {
-  const { isAuthenticated, isAuthLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
-  if (isAuthLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-base">
         <Spinner size="lg" label="Checking your session…" />

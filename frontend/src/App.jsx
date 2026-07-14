@@ -8,6 +8,9 @@ import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import DashboardPlaceholder from './pages/DashboardPlaceholder';
 import { ROUTES } from './utils/constants';
+import Analyze from "./pages/Analyze";
+import History from "./pages/History";
+import AnalysisDetails from "./pages/AnalysisDetails";
 
 const App = () => {
   return (
@@ -32,10 +35,13 @@ const App = () => {
           <Route path={ROUTES.HOME} element={<Home />} />
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.REGISTER} element={<Register />} />
+          <Route path={ROUTES.ANALYZE} element={<Analyze />} />
+          <Route path="/history" element={<History />} />
 
           <Route element={<ProtectedRoute />}>
-            {/* Placeholder until the Dashboard build phase replaces it */}
-            <Route path={ROUTES.DASHBOARD} element={<DashboardPlaceholder />} />
+          <Route path={ROUTES.DASHBOARD} element={<DashboardPlaceholder />} />
+          <Route path={ROUTES.ANALYZE} element={<Analyze />} />
+          <Route path="/history/:id" element={<AnalysisDetails />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
