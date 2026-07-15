@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
-import DashboardPlaceholder from './pages/DashboardPlaceholder';
+import Dashboard from "./pages/Dashboard";
 import { ROUTES } from './utils/constants';
 import Analyze from "./pages/Analyze";
 import History from "./pages/History";
@@ -36,11 +36,10 @@ const App = () => {
           <Route path={ROUTES.HOME} element={<Home />} />
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.REGISTER} element={<Register />} />
-          <Route path={ROUTES.ANALYZE} element={<Analyze />} />
           <Route path="/history" element={<History />} />
 
           <Route element={<ProtectedRoute />}>
-          <Route path={ROUTES.DASHBOARD} element={<DashboardPlaceholder />} />
+          <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.ANALYZE} element={<Analyze />} />
           <Route path="/history/:id" element={<AnalysisDetails />} />
           <Route path="/profile" element={<Profile />} />

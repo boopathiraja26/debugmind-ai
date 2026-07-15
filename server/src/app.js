@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const analysisRoutes = require('./routes/analysisRoutes');
 const userRoutes = require('./routes/userRoutes');
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
@@ -64,6 +65,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/users', userRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Error handlers
 app.use(notFound);

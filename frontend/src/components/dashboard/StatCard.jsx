@@ -1,7 +1,7 @@
 const StatCard = ({ title, value, color }) => {
   return (
-    <div className="rounded-2xl border border-base-border bg-base p-6 shadow">
-      <p className="text-sm text-ink-muted">{title}</p>
+    <div className="rounded-2xl border border-base-border bg-[#111827] p-6 shadow-lg">
+      <p className="text-sm text-gray-400">{title}</p>
 
       <h2
         className="mt-3 text-4xl font-bold"

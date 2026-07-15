@@ -1,32 +1,10 @@
 import api from "./api";
 
-export const getDashboardStats = () => api.get("/dashboard");
-import { getAllAnalyses } from "./analysisService";
-
+/**
+ * Fetch dashboard statistics from the backend.
+ * GET /api/dashboard
+ */
 export const getDashboardStats = async () => {
-  const res = await getAllAnalyses();
-
-  const analyses = res.data.data.analyses;
-
-  const total = analyses.length;
-
-  const completed = analyses.filter(
-    (item) => item.status === "completed"
-  ).length;
-
-  const failed = analyses.filter(
-    (item) => item.status === "failed"
-  ).length;
-
-  const languages = new Set(
-    analyses.map((item) => item.language)
-  ).size;
-
-  return {
-    analyses,
-    total,
-    completed,
-    failed,
-    languages,
-  };
+  const response = await api.get("/dashboard");
+  return response;
 };

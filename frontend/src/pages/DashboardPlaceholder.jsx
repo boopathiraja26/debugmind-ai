@@ -69,7 +69,7 @@ const Dashboard = () => {
 
       <div className="space-y-4">
 
-        {stats.analyses.slice(0, 5).map((item) => (
+        {(stats.recent || []).map((item) => (
 
           <div
             key={item._id}
