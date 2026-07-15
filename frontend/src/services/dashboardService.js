@@ -1,3 +1,6 @@
+import api from "./api";
+
+export const getDashboardStats = () => api.get("/dashboard");
 import { getAllAnalyses } from "./analysisService";
 
 export const getDashboardStats = async () => {

@@ -1,17 +1,14 @@
 const StatCard = ({ title, value, color }) => {
   return (
-    <div className="rounded-xl border border-base-border bg-[#111827] p-6">
+    <div className="rounded-2xl border border-base-border bg-base p-6 shadow">
+      <p className="text-sm text-ink-muted">{title}</p>
 
-      <h3 className="text-sm text-gray-400">
-        {title}
-      </h3>
-
-      <h1
-        className={`mt-3 text-4xl font-bold ${color}`}
+      <h2
+        className="mt-3 text-4xl font-bold"
+        style={{ color }}
       >
         {value}
-      </h1>
-
+      </h2>
     </div>
   );
 };
