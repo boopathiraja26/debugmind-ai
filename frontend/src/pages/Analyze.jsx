@@ -3,8 +3,9 @@ import toast from "react-hot-toast";
 
 import AnalysisForm from "../components/analysis/AnalysisForm";
 import AnalysisResult from "../components/analysis/AnalysisResult";
+
+// Change this import if your service file has a different name.
 import { createAnalysis } from "../services/analysisService";
-import Editor from "@monaco-editor/react";
 
 const Analyze = () => {
   const [loading, setLoading] = useState(false);
@@ -14,15 +15,23 @@ const Analyze = () => {
     try {
       setLoading(true);
 
-      const { data } = await createAnalysis(formData);
+      const response = await createAnalysis(formData);
 
-      setAnalysis(data.data.analysis);
+      // Axios returns { data: ... }
+      const analysisData =
+        response?.data?.data?.analysis ||
+        response?.data?.analysis ||
+        response?.analysis;
 
-      toast.success("Bug analyzed successfully!");
+      setAnalysis(analysisData);
+
+      toast.success("Analysis completed successfully!");
     } catch (err) {
+      console.error(err);
+
       toast.error(
-        err?.message ||
-          err?.response?.data?.message ||
+        err?.response?.data?.message ||
+          err?.message ||
           "Analysis failed."
       );
     } finally {
@@ -32,64 +41,48 @@ const Analyze = () => {
 
   return (
     <div className="container-shell py-10">
-
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-ink">
           AI Bug Analysis
         </h1>
 
         <p className="mt-3 max-w-2xl text-ink-muted">
-          Paste your source code and explain the issue.
-          DebugMind AI will identify the problem,
+          Paste your source code and describe the issue.
+          DebugMind AI will analyze the bug,
           explain the root cause,
-          generate corrected code,
-          and suggest improvements.
+          generate fixed code,
+          and provide best practices.
         </p>
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-
-        {/* LEFT */}
-
+      <div className="grid gap-10 lg:grid-cols-[45%_55%]">
+        {/* Left */}
         <div className="rounded-2xl border border-base-border bg-base p-6 shadow-lg">
-
           <AnalysisForm
             loading={loading}
             onAnalyze={handleAnalyze}
           />
-
         </div>
 
-        {/* RIGHT */}
-
+        {/* Right */}
         <div>
-
           {analysis ? (
             <AnalysisResult analysis={analysis} />
           ) : (
-            <div className="flex h-full min-h-[500px] items-center justify-center rounded-2xl border border-dashed border-base-border bg-base">
-
+            <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-dashed border-base-border bg-base">
               <div className="text-center">
-
                 <h2 className="mb-3 text-xl font-semibold text-ink">
                   No Analysis Yet
                 </h2>
 
-                <p className="max-w-sm text-sm text-ink-muted">
-                  Fill the form and click
-                  <strong> Analyze Bug </strong>
-                  to receive an AI-powered explanation.
+                <p className="text-sm text-ink-muted">
+                  Submit your code to receive an AI-powered analysis.
                 </p>
-
               </div>
-
             </div>
           )}
-
         </div>
-
       </div>
-
     </div>
   );
 };

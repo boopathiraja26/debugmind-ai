@@ -123,7 +123,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         <div className="overflow-hidden rounded-xl border border-base-border shadow-xl">
 
           <Editor
-            height="500px"
+            height="300px"
             language={languageMap[language] || "javascript"}
             theme="vs-dark"
             value={code}

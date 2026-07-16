@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import CodeBlock from "./CodeBlock";
+import { generateAnalysisPDF } from "../../utils/pdfGenerator";
 
 
 const tabs = [
@@ -89,7 +90,7 @@ const ListView = ({items}) => {
 
 
 
-const CodeActions = ({code})=>{
+const CodeActions = ({ code, analysis }) => {
 
 
 const copyCode = async()=>{
@@ -131,41 +132,27 @@ URL.revokeObjectURL(url);
 
 return (
 
-<div className="
-flex
-gap-3
-mb-4
-">
+<div className="flex flex-wrap gap-3 mb-4">
 
 <button
 onClick={copyCode}
-className="
-px-4
-py-2
-rounded-lg
-bg-primary
-text-white
-hover:opacity-90
-transition
-"
+className="px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90 transition"
 >
 📋 Copy Code
 </button>
 
-
 <button
 onClick={downloadCode}
-className="
-px-4
-py-2
-rounded-lg
-border
-border-base-border
-hover:bg-secondary
-transition
-"
+className="px-4 py-2 rounded-lg border border-base-border hover:bg-secondary transition"
 >
-💾 Download
+💾 Download Code
+</button>
+
+<button
+onClick={() => generateAnalysisPDF(analysis)}
+className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
+>
+📄 Download PDF
 </button>
 
 </div>
@@ -226,7 +213,10 @@ return (
 
 <div>
 
-<CodeActions code={ai.fixedCode}/>
+<CodeActions
+code={ai.fixedCode}
+analysis={analysis}
+/>
 
 <CodeBlock
 code={ai.fixedCode}

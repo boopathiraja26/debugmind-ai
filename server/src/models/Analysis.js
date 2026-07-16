@@ -1,81 +1,120 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+
+const AI_TASKS = [
+  "Bug Analysis",
+  "Explain Code",
+  "Code Review",
+  "Performance Review",
+  "Security Audit",
+  "Generate Documentation",
+  "Generate Unit Tests",
+  "Optimize Code",
+  "Ask AI",
+];
 
 const AnalysisSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
       index: true,
     },
+
     title: {
       type: String,
-      required: [true, 'Title is required'],
+      required: [true, "Title is required"],
       trim: true,
-      maxlength: [150, 'Title cannot exceed 150 characters'],
+      maxlength: [150, "Title cannot exceed 150 characters"],
     },
+
+    task: {
+      type: String,
+      required: [true, "AI task is required"],
+      enum: AI_TASKS,
+      default: "Bug Analysis",
+      trim: true,
+    },
+
     language: {
       type: String,
-      required: [true, 'Programming language is required'],
+      required: [true, "Programming language is required"],
       trim: true,
     },
+
+    task: {
+    type: String,
+    default: "Bug Analysis",
+},
+
     bugDescription: {
       type: String,
-      required: [true, 'Bug description is required'],
+      required: [true, "Bug description is required"],
       trim: true,
     },
+
     code: {
       type: String,
-      required: [true, 'Code snippet is required'],
+      required: [true, "Code snippet is required"],
     },
+
     aiResponse: {
       problem: {
         type: String,
-        default: '',
+        default: "",
       },
+
       reason: {
         type: String,
-        default: '',
+        default: "",
       },
+
       fixedCode: {
         type: String,
-        default: '',
+        default: "",
       },
+
       explanation: {
         type: String,
-        default: '',
+        default: "",
       },
+
       bestPractices: {
         type: [String],
         default: [],
       },
+
       performanceImprovements: {
         type: [String],
         default: [],
       },
+
       securityIssues: {
         type: [String],
         default: [],
       },
     },
+
     status: {
       type: String,
-      enum: ['pending', 'completed', 'failed'],
-      default: 'pending',
+      enum: ["pending", "completed", "failed"],
+      default: "pending",
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 AnalysisSchema.index(
   {
-    title: 'text',
-    bugDescription: 'text',
-    code: 'text',
+    title: "text",
+    bugDescription: "text",
+    code: "text",
   },
   {
-    language_override: 'dummyLanguageField',
+    language_override: "dummyLanguageField",
   }
 );
 
-module.exports = mongoose.model('Analysis', AnalysisSchema);
+module.exports = mongoose.model("Analysis", AnalysisSchema);

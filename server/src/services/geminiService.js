@@ -1,5 +1,7 @@
 const { GoogleGenAI } = require('@google/genai');
 const { ApiError } = require('../utils/apiResponse');
+const { buildPrompt } = require("./ai/promptBuilder");
+
 
 let genAI;
 
@@ -17,63 +19,6 @@ const getClient = () => {
   return genAI;
 };
 
-const buildPrompt = (language, bugDescription, code) => `
-You are DebugMind AI, a senior software engineer and expert code reviewer.
-
-Analyze the following buggy code together with the developer's bug description.
-
-Return ONLY valid JSON.
-
-{
-  "problem": "",
-  "reason": "",
-  "fixedCode": "",
-  "explanation": "",
-  "bestPractices": [],
-  "performanceImprovements": [],
-  "securityIssues": []
-}
-
-Programming Language:
-${language}
-
-Bug Description:
-${bugDescription}
-
-Code:
-\`\`\`${language}
-${code}
-\`\`\`
-
-Rules:
-
-- Return JSON only.
-- No markdown.
-- No explanations outside JSON.
-- bestPractices must be an array.
-- performanceImprovements must be an array.
-- securityIssues must be an array.
-`;
-
-const extractJson = (text) => {
-  if (!text) return null;
-
-  const cleaned = text
-    .replace(/```json/gi, '')
-    .replace(/```/g, '')
-    .trim();
-
-  const first = cleaned.indexOf('{');
-  const last = cleaned.lastIndexOf('}');
-
-  if (first === -1 || last === -1) return null;
-
-  try {
-    return JSON.parse(cleaned.slice(first, last + 1));
-  } catch {
-    return null;
-  }
-};
 
 const normalizeArray = (value) => {
   if (Array.isArray(value)) {
@@ -87,13 +32,22 @@ const normalizeArray = (value) => {
   return [];
 };
 
-const analyzeBug = async ({ language, bugDescription, code }) => {
+const analyzeBug = async ({
+  task,
+  language,
+  bugDescription,
+  code,
+}) => {
   const client = getClient();
 
   const model =
     process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 
-  const prompt = buildPrompt(language, bugDescription, code);
+  const prompt = buildPrompt(task,{
+language,
+bugDescription,
+code
+});
 
   let result;
 
