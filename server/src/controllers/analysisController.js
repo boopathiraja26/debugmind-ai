@@ -9,6 +9,12 @@ const { DEFAULT_AI_TASK } = require("../utils/aiTasks");
  * @route POST /api/analysis
  * @access Private
  */
+
+const {
+  sendProgress,
+  sendComplete,
+  sendError,
+} = require("../events/analysisStream");
 const createAnalysis = asyncHandler(async (req, res) => {
   const {
     title,
@@ -21,15 +27,31 @@ const createAnalysis = asyncHandler(async (req, res) => {
   let aiResponse;
 
   try {
+    sendProgress(req.user._id, "🔍 Understanding your request...");
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    sendProgress(req.user._id, "🧠 Building AI prompt...");
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    sendProgress(req.user._id, "🤖 Contacting AI model...");
+
     aiResponse = await runAgent({
-      provider: process.env.AI_PROVIDER || "gemini",
       task,
       language,
       bugDescription,
       code,
     });
+
+    sendProgress(req.user._id, "⚡ Processing AI response...");
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
   } catch (error) {
-    console.error("AI Analysis Error:", error);
+    sendError(
+      req.user._id,
+      error.message || "Analysis failed."
+    );
 
     throw new ApiError(
       error.statusCode || 500,
@@ -48,9 +70,16 @@ const createAnalysis = asyncHandler(async (req, res) => {
     status: "completed",
   });
 
-  return sendSuccess(res, 201, "Analysis completed successfully", {
-    analysis,
-  });
+  sendComplete(req.user._id, analysis);
+
+  return sendSuccess(
+    res,
+    201,
+    "Analysis completed successfully",
+    {
+      analysis,
+    }
+  );
 });
 
 /**

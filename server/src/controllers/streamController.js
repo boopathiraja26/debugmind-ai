@@ -5,8 +5,9 @@ const {
 } = require("../events/analysisStream");
 
 /**
- * GET /api/analysis/stream
- * Private
+ * @desc Stream AI analysis progress
+ * @route GET /api/stream
+ * @access Private
  */
 const analysisStream = asyncHandler(async (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
@@ -19,12 +20,13 @@ const analysisStream = asyncHandler(async (req, res) => {
 
   res.write(
     `event: connected\ndata: ${JSON.stringify({
-      message: "SSE Connected",
+      message: "Connected to DebugMind AI Stream",
     })}\n\n`
   );
 
   req.on("close", () => {
     removeClient(req.user._id);
+    res.end();
   });
 });
 
