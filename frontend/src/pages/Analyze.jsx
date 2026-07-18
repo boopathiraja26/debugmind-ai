@@ -1,23 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import AnalysisForm from "../components/analysis/AnalysisForm";
 import AnalysisResult from "../components/analysis/AnalysisResult";
+import AnalysisProgress from "../components/analysis/AnalysisProgress";
 
-// Change this import if your service file has a different name.
 import { createAnalysis } from "../services/analysisService";
+import {
+  connectAnalysisStream,
+  closeAnalysisStream,
+} from "../services/streamService";
 
 const Analyze = () => {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [steps, setSteps] = useState([]);
+
+  useEffect(() => {
+    connectAnalysisStream(
+      (message) => {
+        setSteps((prev) => [...prev, message]);
+      },
+      () => {},
+      () => {
+        console.log("SSE Closed");
+      }
+    );
+
+    return () => {
+      closeAnalysisStream();
+    };
+  }, []);
 
   const handleAnalyze = async (formData) => {
     try {
       setLoading(true);
+      setAnalysis(null);
+      setSteps([]);
 
       const response = await createAnalysis(formData);
 
-      // Axios returns { data: ... }
       const analysisData =
         response?.data?.data?.analysis ||
         response?.data?.analysis ||
@@ -56,7 +78,7 @@ const Analyze = () => {
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[45%_55%]">
-        {/* Left */}
+        {/* LEFT */}
         <div className="rounded-2xl border border-base-border bg-base p-6 shadow-lg">
           <AnalysisForm
             loading={loading}
@@ -64,9 +86,11 @@ const Analyze = () => {
           />
         </div>
 
-        {/* Right */}
+        {/* RIGHT */}
         <div>
-          {analysis ? (
+          {loading ? (
+            <AnalysisProgress steps={steps} />
+          ) : analysis ? (
             <AnalysisResult analysis={analysis} />
           ) : (
             <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-dashed border-base-border bg-base">

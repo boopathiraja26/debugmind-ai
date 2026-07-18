@@ -1,6 +1,6 @@
 const { GoogleGenAI } = require('@google/genai');
 const { ApiError } = require('../utils/apiResponse');
-const { buildPrompt } = require("./ai/promptBuilder");
+const buildPrompt = require("./ai/promptBuilder");
 
 
 let genAI;
@@ -41,12 +41,13 @@ const analyzeBug = async ({
   const client = getClient();
 
   const model =
-    process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+    process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-  const prompt = buildPrompt(task,{
-language,
-bugDescription,
-code
+  const prompt = buildPrompt({
+  task,
+  language,
+  bugDescription,
+  code,
 });
 
   let result;

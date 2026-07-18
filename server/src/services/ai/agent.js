@@ -1,15 +1,15 @@
 const { analyze } = require("./llmRouter");
 const { planTask } = require("./taskPlanner");
-const { executeTool } = require("./tools/toolManager");
+const { execute } = require("../../mcp/client");
 
 /**
  * AI Agent
  *
  * Responsibilities:
- * 1. Decide what task to execute
- * 2. Decide whether external tools are required
- * 3. Gather extra context
- * 4. Call the LLM Router
+ * 1. Plan the task
+ * 2. Collect external context through MCP
+ * 3. Execute planned tasks
+ * 4. Return AI result
  */
 
 const runAgent = async ({
@@ -21,43 +21,56 @@ const runAgent = async ({
   repositoryUrl,
   projectFiles,
 }) => {
-
+  /**
+   * Task Planning
+   */
   const plan = planTask(task);
 
+  /**
+   * MCP Tool Context
+   */
   let toolContext = null;
 
   /**
-   * Future:
-   * If repository URL exists,
-   * use GitHub Tool.
+   * GitHub Repository Analysis
    */
   if (repositoryUrl) {
-    toolContext = await executeTool({
+    const response = await execute({
       tool: "github",
+      action: "analyzeRepository",
       payload: {
         repositoryUrl,
       },
     });
+
+    if (response.success) {
+      toolContext = response.data;
+    }
   }
 
   /**
-   * Future:
-   * If uploaded project exists,
-   * use Filesystem Tool.
+   * Local Project Analysis
    */
   else if (projectFiles) {
-    toolContext = await executeTool({
+    const response = await execute({
       tool: "filesystem",
+      action: "analyzeProject",
       payload: {
         files: projectFiles,
       },
     });
+
+    if (response.success) {
+      toolContext = response.data;
+    }
   }
 
+  /**
+   * Execute Planned Tasks
+   */
   let finalResult = null;
 
   for (const currentTask of plan) {
-
     finalResult = await analyze({
       provider:
         provider ||
@@ -74,7 +87,6 @@ const runAgent = async ({
 
       toolContext,
     });
-
   }
 
   return finalResult;

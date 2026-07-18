@@ -1,19 +1,41 @@
 /**
- * Filesystem Tool
- * Placeholder implementation.
- * Later this will analyze uploaded projects or local folders.
+ * Filesystem MCP Tool
+ *
+ * Future:
+ * - Read uploaded project
+ * - Parse folders
+ * - Build dependency graph
+ * - Summarize project
  */
 
-const analyzeProjectFiles = async ({ files }) => {
-  return {
-    success: true,
-    tool: "filesystem",
-    totalFiles: files?.length || 0,
-    message: "Filesystem analysis is not implemented yet.",
-    projectSummary: null,
-  };
+const execute = async ({ action, payload }) => {
+  switch (action) {
+    case "analyzeProject":
+      return {
+        success: true,
+        tool: "filesystem",
+
+        totalFiles: payload?.files?.length || 0,
+
+        files: payload?.files || [],
+
+        projectSummary:
+          "Filesystem analysis placeholder.",
+
+        technologies: [],
+
+        folders: [],
+
+        recommendations: [],
+      };
+
+    default:
+      throw new Error(
+        `Unsupported Filesystem action: ${action}`
+      );
+  }
 };
 
 module.exports = {
-  analyzeProjectFiles,
+  execute,
 };
