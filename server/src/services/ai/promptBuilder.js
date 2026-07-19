@@ -30,15 +30,7 @@ const TASK_TEMPLATE_MAP = {
 };
 
 /**
- * Builds the final Gemini prompt.
- *
- * @param {Object} options
- * @param {string} options.task
- * @param {string} options.language
- * @param {string} options.bugDescription
- * @param {string} options.code
- *
- * @returns {string}
+ * Builds the final AI prompt.
  */
 
 const buildPrompt = ({
@@ -46,6 +38,7 @@ const buildPrompt = ({
   language,
   bugDescription,
   code,
+  toolContext,
 }) => {
   const template =
     TASK_TEMPLATE_MAP[task] ||
@@ -55,6 +48,7 @@ const buildPrompt = ({
     language,
     bugDescription,
     code,
+    toolContext,
   });
 };
 

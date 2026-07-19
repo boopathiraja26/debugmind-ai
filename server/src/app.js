@@ -13,6 +13,7 @@ const userRoutes = require('./routes/userRoutes');
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const streamRoutes = require("./routes/streamRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const repositoryRoutes = require("./routes/repositoryRoutes");
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
@@ -70,6 +71,7 @@ app.use('/api/users', userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/stream", streamRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/repository", repositoryRoutes);
 
 // Error handlers
 app.use(notFound);

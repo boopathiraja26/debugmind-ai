@@ -37,6 +37,7 @@ const analyzeBug = async ({
   language,
   bugDescription,
   code,
+  toolContext,
 }) => {
   const client = getClient();
 
@@ -48,6 +49,7 @@ const analyzeBug = async ({
   language,
   bugDescription,
   code,
+  toolContext,
 });
 
   let result;

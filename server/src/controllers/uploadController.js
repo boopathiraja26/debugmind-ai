@@ -1,14 +1,17 @@
 const asyncHandler = require("../utils/asyncHandler");
 const { sendSuccess } = require("../utils/apiResponse");
+const { analyzeProjectFiles } = require("../mcp/tools/filesystemTool");
 
 const uploadFiles = asyncHandler(async (req, res) => {
+  const result = await analyzeProjectFiles({
+    files: req.files,
+  });
+
   return sendSuccess(
     res,
     200,
-    "Files uploaded successfully.",
-    {
-      files: req.files,
-    }
+    "Project analyzed successfully.",
+    result
   );
 });
 

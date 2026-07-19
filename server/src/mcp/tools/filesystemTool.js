@@ -1,64 +1,114 @@
+/**
+ * Filesystem MCP Tool
+ *
+ * Analyzes uploaded project files and returns
+ * useful project context for the AI Agent.
+ */
+
 const path = require("path");
 
-/**
- * Analyze uploaded project files.
- */
-const analyzeProjectFiles = async ({ files }) => {
+const analyzeProjectFiles = async ({ files = [] }) => {
   try {
-    if (!files || !Array.isArray(files)) {
-      return {
-        success: false,
-        error: "No project files provided.",
-      };
-    }
+    const extensions = {};
+    const entryFiles = [];
+    const folders = new Set();
+    const fileNames = [];
 
-    const summary = {
-      totalFiles: files.length,
-      languages: {},
-      folders: new Set(),
-      fileNames: [],
-    };
+    const IMPORTANT_FILES = [
+      "package.json",
+      "package-lock.json",
+      "server.js",
+      "index.js",
+      "app.js",
+      "main.js",
+      "main.jsx",
+      "App.js",
+      "App.jsx",
+      ".env",
+      "vite.config.js",
+      "vite.config.ts",
+      "tsconfig.json",
+      "README.md",
+    ];
 
-    files.forEach((file) => {
-      const extension = path.extname(file.originalname).toLowerCase();
+    for (const file of files) {
+      // File name
+      const name =
+        file.originalname ||
+        file.name ||
+        "";
 
-      summary.languages[extension] =
-        (summary.languages[extension] || 0) + 1;
+      fileNames.push(name);
 
-      summary.fileNames.push(file.originalname);
+      // Extension
+      const ext =
+        path.extname(name).replace(".", "") ||
+        "unknown";
 
-      if (file.originalname.includes("/")) {
-        summary.folders.add(
-          file.originalname.split("/")[0]
-        );
+      extensions[ext] = (extensions[ext] || 0) + 1;
+
+      // Folder
+      const folder = path.dirname(name);
+
+      if (
+        folder &&
+        folder !== "." &&
+        folder !== "/"
+      ) {
+        folders.add(folder);
       }
-    });
+
+      // Important files
+      const baseName = path.basename(name);
+
+      if (IMPORTANT_FILES.includes(baseName)) {
+        entryFiles.push(baseName);
+      }
+    }
 
     return {
       success: true,
 
-      tool: "filesystem",
-
       data: {
-        totalFiles: summary.totalFiles,
+        totalFiles: files.length,
 
-        folders: [...summary.folders],
+        extensions,
 
-        languages: summary.languages,
+        entryFiles,
 
-        files: summary.fileNames,
+        folders: [...folders],
+
+        files: fileNames,
+
+        projectSummary: {
+          hasFrontend:
+            entryFiles.includes("App.jsx") ||
+            entryFiles.includes("main.jsx") ||
+            entryFiles.includes("vite.config.js"),
+
+          hasBackend:
+            entryFiles.includes("server.js") ||
+            entryFiles.includes("app.js") ||
+            entryFiles.includes("index.js"),
+
+          hasPackageJson:
+            entryFiles.includes("package.json"),
+
+          framework:
+            entryFiles.includes("vite.config.js")
+              ? "Vite"
+              : "Unknown",
+        },
       },
     };
-  } catch (err) {
-    console.error("Filesystem Tool:", err);
-
+  } catch (error) {
     return {
       success: false,
-      error: err.message,
+      error: error.message,
     };
   }
 };
 
 module.exports = {
   analyzeProjectFiles,
-};uploadMiddleware.js
+};

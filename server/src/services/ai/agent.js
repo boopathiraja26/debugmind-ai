@@ -66,6 +66,19 @@ const runAgent = async ({
   }
 
   /**
+   * Merge MCP Context into Prompt
+   */
+  let finalBugDescription = bugDescription || "";
+
+  if (toolContext) {
+    finalBugDescription += `
+
+Project Context:
+${JSON.stringify(toolContext, null, 2)}
+`;
+  }
+
+  /**
    * Execute Planned Tasks
    */
   let finalResult = null;
@@ -81,7 +94,7 @@ const runAgent = async ({
 
       language,
 
-      bugDescription,
+      bugDescription: finalBugDescription,
 
       code,
 

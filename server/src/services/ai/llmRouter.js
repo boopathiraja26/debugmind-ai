@@ -2,13 +2,6 @@ const { analyzeBug } = require("../geminiService");
 
 /**
  * Future Multi-LLM Router
- *
- * Currently supports:
- * - Google Gemini
- *
- * Future:
- * - OpenAI
- * - Claude
  */
 const analyze = async ({
   provider = "gemini",
@@ -16,6 +9,7 @@ const analyze = async ({
   language,
   bugDescription,
   code,
+  toolContext,
 }) => {
   switch (provider.toLowerCase()) {
     case "gemini":
@@ -24,9 +18,9 @@ const analyze = async ({
         language,
         bugDescription,
         code,
+        toolContext,
       });
 
-    // Future providers
     case "openai":
       throw new Error("OpenAI provider not implemented yet.");
 

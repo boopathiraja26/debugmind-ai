@@ -1,6 +1,19 @@
 import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import Button from "../ui/Button";
+import { useDropzone } from "react-dropzone";
+
+const TASKS = [
+  "Bug Analysis",
+  "Explain Code",
+  "Code Review",
+  "Performance Review",
+  "Security Audit",
+  "Generate Documentation",
+  "Generate Unit Tests",
+  "Optimize Code",
+  "Ask AI",
+];
 
 const LANGUAGES = [
   "JavaScript",
@@ -28,16 +41,33 @@ const languageMap = {
 
 const AnalysisForm = ({ onAnalyze, loading }) => {
   const [title, setTitle] = useState("");
+  const [task, setTask] = useState("Bug Analysis");
   const [language, setLanguage] = useState("JavaScript");
+  const [repositoryUrl, setRepositoryUrl] = useState("");
   const [bugDescription, setBugDescription] = useState("");
   const [code, setCode] = useState("");
+  const [projectFiles, setProjectFiles] = useState([]);
+
+  const onDrop = (acceptedFiles) => {
+  setProjectFiles(acceptedFiles);
+};
+
+const {
+  getRootProps,
+  getInputProps,
+  isDragActive,
+} = useDropzone({
+  onDrop,
+});
 
   const submitHandler = (e) => {
     e.preventDefault();
 
     onAnalyze({
       title,
+      task,
       language,
+      repositoryUrl,
       bugDescription,
       code,
     });
@@ -63,6 +93,30 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         />
       </div>
 
+      {/* Task */}
+
+      <div>
+        <label className="mb-2 block font-medium text-ink">
+          AI Task
+        </label>
+
+        <select
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white focus:border-brand-500 focus:outline-none"
+        >
+          {TASKS.map((item) => (
+            <option
+              key={item}
+              value={item}
+              className="bg-[#111827]"
+            >
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Language */}
 
       <div>
@@ -79,7 +133,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
             <option
               key={lang}
               value={lang}
-              className="bg-[#111827] text-white"
+              className="bg-[#111827]"
             >
               {lang}
             </option>
@@ -87,24 +141,65 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         </select>
       </div>
 
+      {/* GitHub Repository */}
+
+      <div>
+        <label className="mb-2 block font-medium text-ink">
+          GitHub Repository (Optional)
+        </label>
+
+        <input
+          type="url"
+          value={repositoryUrl}
+          onChange={(e) => setRepositoryUrl(e.target.value)}
+          placeholder="https://github.com/facebook/react"
+          className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
+        />
+      </div>
+
+      <div>
+  <label className="mb-2 block font-medium text-ink">
+    Upload Project (Optional)
+  </label>
+
+  <div
+    {...getRootProps()}
+    className="cursor-pointer rounded-xl border-2 border-dashed border-base-border p-8 text-center"
+  >
+    <input {...getInputProps()} />
+
+    {isDragActive ? (
+      <p>Drop project here...</p>
+    ) : (
+      <p>Drag & Drop project files here</p>
+    )}
+  </div>
+
+  {projectFiles.length > 0 && (
+    <div className="mt-3 text-sm text-green-500">
+      {projectFiles.length} file(s) selected
+    </div>
+  )}
+</div>
+
       {/* Bug Description */}
 
       <div>
         <label className="mb-2 block font-medium text-ink">
-          Bug Description
+          Description
         </label>
 
         <textarea
           rows={5}
           value={bugDescription}
           onChange={(e) => setBugDescription(e.target.value)}
-          placeholder="Describe the bug..."
+          placeholder="Describe your issue or ask your question..."
           required
           className="w-full rounded-xl border border-base-border bg-[#111827] p-3 text-white placeholder:text-gray-400 focus:border-brand-500 focus:outline-none"
         />
       </div>
 
-      {/* Monaco Editor */}
+      {/* Monaco */}
 
       <div>
 
@@ -123,7 +218,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         <div className="overflow-hidden rounded-xl border border-base-border shadow-xl">
 
           <Editor
-            height="300px"
+            height="350px"
             language={languageMap[language] || "javascript"}
             theme="vs-dark"
             value={code}
@@ -139,7 +234,6 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
               tabSize: 2,
               formatOnPaste: true,
               formatOnType: true,
-              roundedSelection: false,
               cursorBlinking: "smooth",
               smoothScrolling: true,
               lineNumbers: "on",
@@ -159,7 +253,7 @@ const AnalysisForm = ({ onAnalyze, loading }) => {
         fullWidth
         disabled={loading}
       >
-        {loading ? "Analyzing..." : "🚀 Analyze Bug"}
+        {loading ? "Analyzing..." : "🚀 Analyze with AI Agent"}
       </Button>
 
     </form>
