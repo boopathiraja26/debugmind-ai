@@ -17,63 +17,108 @@ const repositoryRoutes = require("./routes/repositoryRoutes");
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-const app = express(); // ✅ Create app FIRST
+const app = express();
 
-// Security middleware
+// =============================
+// Security Middleware
+// =============================
+
 app.use(helmet());
 
 app.use(
   cors({
-    origin: ['http://localhost:5173'],
+    origin: [
+      "http://localhost:5173",
+      process.env.CLIENT_URL,
+    ],
     credentials: true,
   })
 );
 
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(xss());
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   app.use(
-    morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev')
+    morgan(
+      process.env.NODE_ENV === "production"
+        ? "combined"
+        : "dev"
+    )
   );
 }
 
-// Rate limiting
+// =============================
+// Rate Limiter
+// =============================
+
 const limiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: Number(process.env.RATE_LIMIT_MAX) || 100,
+  windowMs:
+    Number(process.env.RATE_LIMIT_WINDOW_MS) ||
+    15 * 60 * 1000,
+
+  max:
+    Number(process.env.RATE_LIMIT_MAX) ||
+    100,
+
   standardHeaders: true,
   legacyHeaders: false,
+
   message: {
     success: false,
-    message: 'Too many requests, please try again later.',
+    message:
+      "Too many requests, please try again later.",
   },
 });
 
-app.use('/api', limiter);
+app.use("/api", limiter);
 
-// Health
-app.get('/api/health', (req, res) => {
+// =============================
+// Root Route
+// =============================
+
+app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'DebugMind AI API is healthy',
+    message: "🚀 DebugMind AI Backend is Running",
+    version: "1.0.0",
+    environment:
+      process.env.NODE_ENV || "development",
+    documentation: "/api/health",
+  });
+});
+
+// =============================
+// Health Check
+// =============================
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "DebugMind AI API is healthy",
     timestamp: new Date().toISOString(),
   });
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/analysis', analysisRoutes);
-app.use('/api/users', userRoutes);
+// =============================
+// API Routes
+// =============================
+
+app.use("/api/auth", authRoutes);
+app.use("/api/analysis", analysisRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/stream", streamRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/repository", repositoryRoutes);
 
-// Error handlers
+// =============================
+// Error Handlers
+// =============================
+
 app.use(notFound);
 app.use(errorHandler);
 
