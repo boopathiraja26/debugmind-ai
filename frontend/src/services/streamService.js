@@ -1,3 +1,6 @@
+import { API_BASE_URL } from "../utils/constants";
+import { getToken } from "../utils/token";
+
 let eventSource = null;
 
 export const connectAnalysisStream = (
@@ -5,15 +8,24 @@ export const connectAnalysisStream = (
   onComplete,
   onError
 ) => {
+  const token = getToken();
+
+  if (!token) {
+    console.error("No authentication token found.");
+    return;
+  }
+
+  // Close previous connection if one exists
+  if (eventSource) {
+    eventSource.close();
+  }
+
   eventSource = new EventSource(
-    `${import.meta.env.VITE_API_URL}/stream`,
-    {
-      withCredentials: true,
-    }
+    `${API_BASE_URL}/stream?token=${encodeURIComponent(token)}`
   );
 
-  eventSource.addEventListener("connected", (event) => {
-    console.log("SSE Connected");
+  eventSource.addEventListener("connected", () => {
+    console.log("✅ SSE Connected");
   });
 
   eventSource.addEventListener("progress", (event) => {
@@ -27,17 +39,24 @@ export const connectAnalysisStream = (
     onComplete(data);
 
     eventSource.close();
+    eventSource = null;
   });
 
-  eventSource.addEventListener("error", () => {
+  eventSource.addEventListener("error", (event) => {
+    console.error("❌ SSE Error:", event);
+
     onError();
 
-    eventSource.close();
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
   });
 };
 
 export const closeAnalysisStream = () => {
   if (eventSource) {
     eventSource.close();
+    eventSource = null;
   }
 };

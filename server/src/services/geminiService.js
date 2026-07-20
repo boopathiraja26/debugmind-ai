@@ -60,7 +60,9 @@ const analyzeBug = async ({
       contents: prompt,
     });
   } catch (err) {
-    console.error('Gemini Error:', err);
+    console.error("========== GEMINI ERROR ==========");
+    console.dir(err, { depth: null });
+    console.error("==================================");
 
     const message = err?.message || '';
 
