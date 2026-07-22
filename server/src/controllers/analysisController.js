@@ -24,7 +24,12 @@ const createAnalysis = asyncHandler(async (req, res) => {
     code,
   } = req.body;
 
+  console.log("============== REQUEST BODY ==============");
+console.log(req.body);
+console.log("==========================================");
+
   let aiResponse;
+  
 
   try {
     sendProgress(req.user._id, "🔍 Understanding your request...");

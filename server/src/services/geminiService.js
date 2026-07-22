@@ -1,16 +1,30 @@
-const { GoogleGenAI } = require('@google/genai');
-const { ApiError } = require('../utils/apiResponse');
+const { GoogleGenAI } = require("@google/genai");
+const { ApiError } = require("../utils/apiResponse");
 const buildPrompt = require("./ai/promptBuilder");
 
-
-let genAI;
+let genAI = null;
 
 const getClient = () => {
   if (!process.env.GEMINI_API_KEY) {
-    throw new ApiError(500, 'GEMINI_API_KEY is not configured on the server');
+    throw new ApiError(
+      500,
+      "GEMINI_API_KEY is not configured on the server."
+    );
   }
 
   if (!genAI) {
+    console.log("======================================");
+    console.log("Initializing Gemini Client");
+    console.log(
+      "Model:",
+      process.env.GEMINI_MODEL || "gemini-2.0-flash"
+    );
+    console.log(
+      "API Key Exists:",
+      !!process.env.GEMINI_API_KEY
+    );
+    console.log("======================================");
+
     genAI = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,
     });
@@ -19,13 +33,12 @@ const getClient = () => {
   return genAI;
 };
 
-
 const normalizeArray = (value) => {
   if (Array.isArray(value)) {
-    return value.filter((item) => typeof item === 'string');
+    return value.filter((item) => typeof item === "string");
   }
 
-  if (typeof value === 'string' && value.trim()) {
+  if (typeof value === "string" && value.trim()) {
     return [value.trim()];
   }
 
@@ -42,15 +55,15 @@ const analyzeBug = async ({
   const client = getClient();
 
   const model =
-    process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
   const prompt = buildPrompt({
-  task,
-  language,
-  bugDescription,
-  code,
-  toolContext,
-});
+    task,
+    language,
+    bugDescription,
+    code,
+    toolContext,
+  });
 
   let result;
 
@@ -59,83 +72,96 @@ const analyzeBug = async ({
       model,
       contents: prompt,
     });
-  } catch (err) {
-    console.error("========== GEMINI ERROR ==========");
-    console.dir(err, { depth: null });
-    console.error("==================================");
 
-    const message = err?.message || '';
+    console.log("✅ Gemini Response Received");
+  } catch (err) {
+    console.log("\n========== GEMINI ERROR ==========");
+    console.log("Status:", err?.status);
+    console.log("Message:", err?.message);
+    console.log("Code:", err?.code);
+    console.dir(err, { depth: null });
+    console.log("==================================");
+
+    const message = err?.message || "";
 
     if (
-      message.includes('RESOURCE_EXHAUSTED') ||
-      message.includes('429')
+      message.includes("RESOURCE_EXHAUSTED") ||
+      message.includes("429")
     ) {
       throw new ApiError(
         429,
-        'AI service quota exceeded. Please try again later.'
+        "AI service quota exceeded. Please try again later."
       );
     }
 
     if (
-      message.includes('UNAVAILABLE') ||
-      message.includes('503')
+      message.includes("UNAVAILABLE") ||
+      message.includes("503")
     ) {
       throw new ApiError(
         503,
-        'AI service is temporarily busy. Please try again in a few minutes.'
+        "AI service is temporarily unavailable."
       );
     }
 
     if (
-      message.includes('INVALID_ARGUMENT') ||
-      message.includes('404')
+      message.includes("INVALID_ARGUMENT") ||
+      message.includes("404")
     ) {
       throw new ApiError(
         500,
-        'Invalid Gemini model configured.'
+        "Invalid Gemini model configured."
       );
     }
 
     throw new ApiError(
       500,
-      'Failed to analyze the code. Please try again.'
+      err?.message || "Failed to analyze code."
     );
   }
 
   const responseText =
-    typeof result?.text === 'string'
+    typeof result?.text === "string"
       ? result.text
-      : '';
+      : "";
 
+  if (!responseText) {
+    throw new ApiError(
+      500,
+      "Gemini returned an empty response."
+    );
+  }
+
+  // Keep your existing extractJson() function
   const parsed = extractJson(responseText);
 
   if (!parsed) {
     throw new ApiError(
       500,
-      'AI returned an invalid response.'
+      "AI returned an invalid JSON response."
     );
   }
 
   return {
     problem:
-      typeof parsed.problem === 'string'
+      typeof parsed.problem === "string"
         ? parsed.problem
-        : '',
+        : "",
 
     reason:
-      typeof parsed.reason === 'string'
+      typeof parsed.reason === "string"
         ? parsed.reason
-        : '',
+        : "",
 
     fixedCode:
-      typeof parsed.fixedCode === 'string'
+      typeof parsed.fixedCode === "string"
         ? parsed.fixedCode
-        : '',
+        : "",
 
     explanation:
-      typeof parsed.explanation === 'string'
+      typeof parsed.explanation === "string"
         ? parsed.explanation
-        : '',
+        : "",
 
     bestPractices: normalizeArray(parsed.bestPractices),
 
@@ -143,7 +169,9 @@ const analyzeBug = async ({
       parsed.performanceImprovements
     ),
 
-    securityIssues: normalizeArray(parsed.securityIssues),
+    securityIssues: normalizeArray(
+      parsed.securityIssues
+    ),
   };
 };
 

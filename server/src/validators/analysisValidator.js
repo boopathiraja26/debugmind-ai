@@ -1,13 +1,17 @@
 const { AI_TASKS, DEFAULT_AI_TASK } = require("../utils/aiTasks");
 
 const MAX_TITLE_LENGTH = 150;
-const MAX_BUG_DESCRIPTION_LENGTH = 5000;
+const MAX_PROMPT_LENGTH = 5000;
 const MAX_CODE_LENGTH = 20000;
+
+/* ====================================================== */
+/* CREATE ANALYSIS */
+/* ====================================================== */
 
 const validateCreateAnalysis = (data = {}) => {
   const errors = [];
 
-  const {
+  let {
     title,
     task,
     language,
@@ -15,55 +19,76 @@ const validateCreateAnalysis = (data = {}) => {
     code,
   } = data;
 
-  // Title
-  if (!title || typeof title !== "string" || title.trim().length < 3) {
-    errors.push("Title must be at least 3 characters long");
-  }
+  /* ------------------------------
+     Auto defaults for Chat UI
+  ------------------------------ */
 
-  if (title && title.length > MAX_TITLE_LENGTH) {
-    errors.push(`Title cannot exceed ${MAX_TITLE_LENGTH} characters`);
-  }
+  title =
+    typeof title === "string" && title.trim()
+      ? title.trim()
+      : "AI Analysis";
 
-  // AI Task
-  if (task && !AI_TASKS.includes(task)) {
-    errors.push("Invalid AI task selected");
-  }
+  task =
+    typeof task === "string" &&
+    AI_TASKS.includes(task)
+      ? task
+      : DEFAULT_AI_TASK;
 
-  // Language
-  if (
-    !language ||
-    typeof language !== "string" ||
-    language.trim().length === 0
-  ) {
-    errors.push("Programming language is required");
-  }
+  language =
+    typeof language === "string" &&
+    language.trim()
+      ? language.trim()
+      : "Auto Detect";
 
-  // Bug Description
-  if (
-    !bugDescription ||
-    typeof bugDescription !== "string" ||
-    bugDescription.trim().length < 10
-  ) {
-    errors.push("Bug description must be at least 10 characters long");
-  }
+  bugDescription =
+    typeof bugDescription === "string"
+      ? bugDescription.trim()
+      : "";
 
-  if (
-    bugDescription &&
-    bugDescription.length > MAX_BUG_DESCRIPTION_LENGTH
-  ) {
+  code =
+    typeof code === "string"
+      ? code.trim()
+      : "";
+
+  /* ------------------------------
+     Validation
+  ------------------------------ */
+
+  if (title.length > MAX_TITLE_LENGTH) {
     errors.push(
-      `Bug description cannot exceed ${MAX_BUG_DESCRIPTION_LENGTH} characters`
+      `Title cannot exceed ${MAX_TITLE_LENGTH} characters`
     );
   }
 
-  // Code
-  if (!code || typeof code !== "string" || code.trim().length === 0) {
-    errors.push("Code snippet is required");
+  if (!AI_TASKS.includes(task)) {
+    errors.push("Invalid AI task selected");
   }
 
-  if (code && code.length > MAX_CODE_LENGTH) {
+  if (bugDescription.length < 3) {
     errors.push(
-      `Code snippet cannot exceed ${MAX_CODE_LENGTH} characters`
+      "Please enter a prompt or describe your issue."
+    );
+  }
+
+  if (bugDescription.length > MAX_PROMPT_LENGTH) {
+    errors.push(
+      `Prompt cannot exceed ${MAX_PROMPT_LENGTH} characters`
+    );
+  }
+
+  if (code.length > MAX_CODE_LENGTH) {
+    errors.push(
+      `Code cannot exceed ${MAX_CODE_LENGTH} characters`
+    );
+  }
+
+  /* ------------------------------
+     Require either prompt or code
+  ------------------------------ */
+
+  if (!bugDescription && !code) {
+    errors.push(
+      "Please enter a prompt or paste code."
     );
   }
 
@@ -75,59 +100,57 @@ const validateCreateAnalysis = (data = {}) => {
 
   return {
     value: {
-      title: title.trim(),
-      task: task || DEFAULT_AI_TASK,
-      language: language.trim(),
-      bugDescription: bugDescription.trim(),
-      code: code.trim(),
+      title,
+      task,
+      language,
+      bugDescription,
+      code,
     },
   };
 };
 
-/* ---------------------------------------------------------- */
+/* ====================================================== */
+/* LIST */
+/* ====================================================== */
 
-const ALLOWED_STATUS = ["pending", "completed", "failed"];
+const ALLOWED_STATUS = [
+  "pending",
+  "completed",
+  "failed",
+];
+
 const MAX_LIMIT = 50;
 const MAX_SEARCH_LENGTH = 200;
 
 const parsePagination = (data = {}) => {
   const errors = [];
 
-  const rawPage = data.page;
-  const rawLimit = data.limit;
-
   let page = 1;
+  let limit = 10;
 
-  if (rawPage !== undefined) {
-    const parsedPage = Number.parseInt(rawPage, 10);
+  if (data.page !== undefined) {
+    const p = parseInt(data.page);
 
-    if (
-      !Number.isInteger(parsedPage) ||
-      parsedPage < 1 ||
-      String(parsedPage) !== String(rawPage).trim()
-    ) {
+    if (Number.isNaN(p) || p < 1) {
       errors.push("Page must be a positive integer");
     } else {
-      page = parsedPage;
+      page = p;
     }
   }
 
-  let limit = 10;
-
-  if (rawLimit !== undefined) {
-    const parsedLimit = Number.parseInt(rawLimit, 10);
+  if (data.limit !== undefined) {
+    const l = parseInt(data.limit);
 
     if (
-      !Number.isInteger(parsedLimit) ||
-      parsedLimit < 1 ||
-      parsedLimit > MAX_LIMIT ||
-      String(parsedLimit) !== String(rawLimit).trim()
+      Number.isNaN(l) ||
+      l < 1 ||
+      l > MAX_LIMIT
     ) {
       errors.push(
-        `Limit must be a positive integer not exceeding ${MAX_LIMIT}`
+        `Limit must be between 1 and ${MAX_LIMIT}`
       );
     } else {
-      limit = parsedLimit;
+      limit = l;
     }
   }
 
@@ -138,16 +161,8 @@ const parsePagination = (data = {}) => {
   };
 };
 
-/* ---------------------------------------------------------- */
-
 const validateListQuery = (data = {}) => {
   const errors = [];
-
-  const {
-    status,
-    language,
-    date,
-  } = data;
 
   const {
     errors: paginationErrors,
@@ -158,66 +173,42 @@ const validateListQuery = (data = {}) => {
   errors.push(...paginationErrors);
 
   if (
-    status !== undefined &&
-    !ALLOWED_STATUS.includes(status)
+    data.status &&
+    !ALLOWED_STATUS.includes(data.status)
   ) {
-    errors.push(
-      `Status must be one of: ${ALLOWED_STATUS.join(", ")}`
-    );
+    errors.push("Invalid status");
   }
 
   if (
-    language !== undefined &&
-    (typeof language !== "string" ||
-      language.trim().length === 0)
+    data.language &&
+    typeof data.language !== "string"
   ) {
-    errors.push("Language must be a non-empty string");
+    errors.push("Invalid language");
   }
 
-  if (date !== undefined) {
-    const isValidDate =
-      typeof date === "string" &&
-      /^\d{4}-\d{2}-\d{2}$/.test(date) &&
-      !Number.isNaN(Date.parse(date));
-
-    if (!isValidDate) {
-      errors.push(
-        "Date must be a valid date in YYYY-MM-DD format"
-      );
-    }
-  }
-
-  if (errors.length > 0) {
-    return {
-      error: errors,
-    };
+  if (errors.length) {
+    return { error: errors };
   }
 
   return {
     value: {
       page,
       limit,
-      status: status || undefined,
-      language: language
-        ? language.trim()
-        : undefined,
-      date: date || undefined,
+      status: data.status,
+      language: data.language,
+      date: data.date,
     },
   };
 };
 
-/* ---------------------------------------------------------- */
+/* ====================================================== */
+/* SEARCH */
+/* ====================================================== */
 
 const validateSearchQuery = (data = {}) => {
   const errors = [];
 
   const {
-    q,
-    status,
-    language,
-  } = data;
-
-  const {
     errors: paginationErrors,
     page,
     limit,
@@ -226,39 +217,27 @@ const validateSearchQuery = (data = {}) => {
   errors.push(...paginationErrors);
 
   if (
-    q !== undefined &&
-    (typeof q !== "string" ||
-      q.trim().length === 0)
+    data.q &&
+    data.q.length > MAX_SEARCH_LENGTH
   ) {
-    errors.push(
-      "Search keyword (q) must be a non-empty string"
-    );
-  }
-
-  if (q && q.length > MAX_SEARCH_LENGTH) {
-    errors.push(
-      `Search keyword cannot exceed ${MAX_SEARCH_LENGTH} characters`
-    );
+    errors.push("Search keyword too long");
   }
 
   if (
-    status !== undefined &&
-    !ALLOWED_STATUS.includes(status)
+    data.status &&
+    !ALLOWED_STATUS.includes(data.status)
   ) {
-    errors.push(
-      `Status must be one of: ${ALLOWED_STATUS.join(", ")}`
-    );
+    errors.push("Invalid status");
   }
 
   if (
-    language !== undefined &&
-    (typeof language !== "string" ||
-      language.trim().length === 0)
+    data.language &&
+    typeof data.language !== "string"
   ) {
-    errors.push("Language must be a non-empty string");
+    errors.push("Invalid language");
   }
 
-  if (errors.length > 0) {
+  if (errors.length) {
     return {
       error: errors,
     };
@@ -266,13 +245,11 @@ const validateSearchQuery = (data = {}) => {
 
   return {
     value: {
-      q: q ? q.trim() : "",
+      q: data.q || "",
       page,
       limit,
-      status: status || undefined,
-      language: language
-        ? language.trim()
-        : undefined,
+      status: data.status,
+      language: data.language,
     },
   };
 };

@@ -1,7 +1,14 @@
 import api from "./api";
 
-export const createAnalysis = (data) =>
-  api.post("/analysis", data);
+export const createAnalysis = async (data) => {
+  console.log("========== PAYLOAD ==========");
+  console.log(data);
+  console.log(JSON.stringify(data, null, 2));
+
+  const response = await api.post("/analysis", data);
+
+  return response;
+};
 
 export const getAllAnalyses = (params) =>
   api.get("/analysis", { params });
