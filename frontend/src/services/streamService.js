@@ -11,11 +11,10 @@ export const connectAnalysisStream = (
   const token = getToken();
 
   if (!token) {
-    console.error("No authentication token found.");
+    console.error("No token found.");
     return;
   }
 
-  // Close previous connection if one exists
   if (eventSource) {
     eventSource.close();
   }
@@ -24,8 +23,12 @@ export const connectAnalysisStream = (
     `${API_BASE_URL}/stream?token=${encodeURIComponent(token)}`
   );
 
-  eventSource.addEventListener("connected", () => {
+  eventSource.onopen = () => {
     console.log("✅ SSE Connected");
+  };
+
+  eventSource.addEventListener("connected", (event) => {
+    console.log("Connected:", event.data);
   });
 
   eventSource.addEventListener("progress", (event) => {
@@ -38,20 +41,22 @@ export const connectAnalysisStream = (
 
     onComplete(data);
 
-    eventSource.close();
-    eventSource = null;
-  });
-
-  eventSource.addEventListener("error", (event) => {
-    console.error("❌ SSE Error:", event);
-
-    onError();
-
     if (eventSource) {
       eventSource.close();
       eventSource = null;
     }
   });
+
+  eventSource.onerror = (err) => {
+    console.error("SSE Error:", err);
+
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+
+    onError();
+  };
 };
 
 export const closeAnalysisStream = () => {
