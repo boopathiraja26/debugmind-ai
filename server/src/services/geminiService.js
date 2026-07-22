@@ -45,6 +45,34 @@ const normalizeArray = (value) => {
   return [];
 };
 
+/**
+ * Extract JSON from Gemini response.
+ */
+const extractJson = (text) => {
+  try {
+    return JSON.parse(text);
+  } catch (_) {}
+
+  const match = text.match(/```json\s*([\s\S]*?)```/i);
+
+  if (match) {
+    try {
+      return JSON.parse(match[1]);
+    } catch (_) {}
+  }
+
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+
+  if (start !== -1 && end !== -1) {
+    try {
+      return JSON.parse(text.substring(start, end + 1));
+    } catch (_) {}
+  }
+
+  return null;
+};
+
 const analyzeBug = async ({
   task,
   language,
@@ -132,10 +160,13 @@ const analyzeBug = async ({
     );
   }
 
-  // Keep your existing extractJson() function
   const parsed = extractJson(responseText);
 
   if (!parsed) {
+    console.log("========== RAW GEMINI RESPONSE ==========");
+    console.log(responseText);
+    console.log("=========================================");
+
     throw new ApiError(
       500,
       "AI returned an invalid JSON response."
