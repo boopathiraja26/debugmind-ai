@@ -1,20 +1,23 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
-import Footer from './Footer';
+import { ROUTES } from '../../utils/constants';
 
 /**
  * Shared shell rendered around every route: sticky navbar, routed page
- * content, and a footer. Keeps the page background and min-height
- * consistent across the app.
+ * content. Footer is now handled per-page to avoid cluttering app views.
  */
-const Layout = () => (
-  <div className="flex min-h-screen flex-col bg-base">
-    <Navbar />
-    <main className="flex-1">
-      <Outlet />
-    </main>
-    <Footer />
-  </div>
-);
+const Layout = () => {
+  const location = useLocation();
+  const isHome = location.pathname === ROUTES.HOME;
+
+  return (
+    <div className="flex min-h-screen flex-col bg-base">
+      <Navbar />
+      <main className={`flex-1 ${!isHome ? 'pt-16' : ''}`}>
+        <Outlet />
+      </main>
+    </div>
+  );
+};
 
 export default Layout;
