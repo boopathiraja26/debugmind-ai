@@ -3,6 +3,8 @@ import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../utils/constants';
 import { getToken, clearToken, clearStoredUser } from '../utils/token';
 
+console.log('API_BASE_URL =>', API_BASE_URL);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
