@@ -117,7 +117,7 @@ const Home = () => {
         </div>
 
         {/* Floating Code Cards Decoration */}
-        <motion.div style={{ y, opacity }} className="absolute bottom-0 left-0 right-0 h-[40vh] pointer-events-none" style={{ perspective: '1000px' }}>
+        <motion.div style={{ y, opacity, perspective: '1000px' }} className="absolute bottom-0 left-0 right-0 h-[40vh] pointer-events-none">
            <div className="absolute left-[5%] md:left-[15%] bottom-[20%] w-64 md:w-72 rounded-xl border border-white/10 bg-black/60 p-4 backdrop-blur-xl shadow-2xl shadow-indigo-500/10" style={{ transform: 'rotate(-15deg) rotateX(20deg)' }}>
               <div className="flex items-center gap-2 mb-3 border-b border-white/5 pb-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
