@@ -28,12 +28,31 @@ const app = express();
 
 app.use(helmet());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://debugmind-ai-pi.vercel.app",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : []),
+]
+  .map((url) => url.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL,
-    ].filter(Boolean),
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.replace(/\/+$/, "");
+
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        /\.vercel\.app$/.test(cleanOrigin)
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
     credentials: true,
   })
 );
