@@ -65,7 +65,7 @@ const fadeUp = {
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
-  const primaryCtaTarget = isAuthenticated ? ROUTES.DASHBOARD : ROUTES.REGISTER;
+  const primaryCtaTarget = isAuthenticated ? ROUTES.ANALYZE : ROUTES.REGISTER;
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);

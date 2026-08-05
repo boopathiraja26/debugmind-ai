@@ -17,7 +17,7 @@ const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
 
-  const redirectTarget = location.state?.from?.pathname || ROUTES.DASHBOARD;
+  const redirectTarget = location.state?.from?.pathname || ROUTES.ANALYZE;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
