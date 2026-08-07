@@ -73,14 +73,9 @@ DebugMind AI is a full-stack AI-powered developer assistant that helps developer
 Example:
 
 ```
-/screenshots
-   ├── home.png
-   ├── code-review.png
-   ├── bug-analysis.png
-   └── ai-chat.png
-```
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cd07cb99-ee20-4d5d-a1c3-748641416f15" />
 
----
+```
 
 ## ⚙️ Installation
 
